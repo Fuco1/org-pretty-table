@@ -130,8 +130,10 @@ Used by jit-lock for dynamic highlighting."
                    (previous-line)
                    (memq (following-char) '(? 10)))
                  (save-excursion
-                   (backward-char 1)
-                   (next-line)
+                   (let ((char-pos (- (point) (line-beginning-position) 1)))
+                     (forward-line 1)
+                     (beginning-of-line)
+                     (forward-char char-pos))
                    (eq (following-char) ?|)))
             (put-text-property (match-beginning 0) (match-end 0) 'display "┬")
             t)
