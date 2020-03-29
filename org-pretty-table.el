@@ -32,7 +32,7 @@
 (defconst org-pretty-table-regexp (regexp-opt '("-" "+" "|")))
 
 (defsubst org-pretty-table-is-empty-line ()
-  (memq (following-char) '(? 10)))
+  (memq (following-char) '(? 10 ?#)))
 
 (defun org-pretty-table-propertize-region (start end)
   "Replace org-table characters with box-drawing unicode glyphs
@@ -110,8 +110,10 @@ Used by jit-lock for dynamic highlighting."
                    (backward-char 1)
                    (eq (preceding-char) ?-))
                  (save-excursion
-                   (backward-char 1)
-                   (previous-line)
+                   (let ((char-pos (- (point) (line-beginning-position) 1)))
+                     (forward-line -1)
+                     (beginning-of-line)
+                     (forward-char char-pos))
                    (eq (following-char) ?|))
                  (save-excursion
                    (backward-char 1)
@@ -128,8 +130,10 @@ Used by jit-lock for dynamic highlighting."
                    (previous-line)
                    (memq (following-char) '(? 10)))
                  (save-excursion
-                   (backward-char 1)
-                   (next-line)
+                   (let ((char-pos (- (point) (line-beginning-position) 1)))
+                     (forward-line 1)
+                     (beginning-of-line)
+                     (forward-char char-pos))
                    (eq (following-char) ?|)))
             (put-text-property (match-beginning 0) (match-end 0) 'display "┬")
             t)
@@ -138,13 +142,16 @@ Used by jit-lock for dynamic highlighting."
                    (backward-char 1)
                    (eq (preceding-char) ?-))
                  (save-excursion
-                   (backward-char 1)
-                   (previous-line)
+                   (let ((char-pos (- (point) (line-beginning-position) 1)))
+                     (forward-line -1)
+                     (beginning-of-line)
+                     (forward-char char-pos))
                    (eq (following-char) ?|))
                  (save-excursion
                    (backward-char 1)
                    (next-line)
-                   (memq (following-char) '(? 10))))
+                   (or (memq (following-char) '(? 10))
+                       (eq (char-after (line-beginning-position)) ?#))))
             (put-text-property (match-beginning 0) (match-end 0) 'display "┴")
             t))))))))
 
