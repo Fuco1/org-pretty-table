@@ -32,7 +32,7 @@
 (defconst org-pretty-table-regexp (regexp-opt '("-" "+" "|")))
 
 (defsubst org-pretty-table-is-empty-line ()
-  (memq (following-char) '(? 10 ?#)))
+  (looking-at-p (rx bol (* blank) (or eol ?#))))
 
 (defun org-pretty-table-propertize-region (start end)
   "Replace org-table characters with box-drawing unicode glyphs
@@ -59,7 +59,7 @@ Used by jit-lock for dynamic highlighting."
           (unless table-end
             (save-match-data
               (setq table-end (org-table-end))))
-          
+
           ;; determine the context of the character
           (let ((match (match-string 0)))
             (cond
