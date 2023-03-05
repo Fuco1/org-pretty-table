@@ -117,6 +117,11 @@ The order of the blocks is:
     (forward-line -1)
     (move-to-column cc)))
 
+(defun org-pretty-table-at-table-p ()
+  (save-excursion
+    (skip-syntax-forward " " (line-end-position))
+    (eq (following-char) ?|)))
+
 (defun org-pretty-table-propertize-region (start end)
   "Replace org-table characters with box-drawing unicode glyphs
 between START and END.
@@ -156,13 +161,14 @@ Used by jit-lock for dynamic highlighting."
                ((and (eq (following-char) ?-)
                      (save-excursion
                        (forward-line 1)
-                       (not (org-pretty-table-is-empty-line)))
+                       (org-pretty-table-at-table-p))
                      (save-excursion
                        (backward-char 1)
                        (not (bobp)))
                      (save-excursion
                        (forward-line -1)
-                       (not (org-pretty-table-is-empty-line))))
+                       (and (not (bobp))
+                            (org-pretty-table-at-table-p))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-rf-t))
                 t)
                ((and (save-excursion
@@ -170,11 +176,11 @@ Used by jit-lock for dynamic highlighting."
                        (eq (preceding-char) ?-))
                      (save-excursion
                        (forward-line 1)
-                       (not (org-pretty-table-is-empty-line)))
+                       (org-pretty-table-at-table-p))
                      (save-excursion
                        (forward-line -1)
                        (and (not (bobp))
-                            (not (org-pretty-table-is-empty-line)))))
+                            (org-pretty-table-at-table-p))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-lf-t))
                 t)
                ((and (save-excursion
@@ -183,7 +189,7 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (forward-line -1)
                        (or (bobp)
-                           (org-pretty-table-is-empty-line))))
+                           (not (org-pretty-table-at-table-p)))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ur-corner))
                 t)
                ((and (save-excursion
@@ -191,20 +197,20 @@ Used by jit-lock for dynamic highlighting."
                        (eq (preceding-char) ?-))
                      (save-excursion
                        (forward-line 1)
-                       (org-pretty-table-is-empty-line)))
+                       (not (org-pretty-table-at-table-p))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-lr-corner))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
                        (forward-line -1)
                        (or (bobp)
-                           (org-pretty-table-is-empty-line))))
+                           (not (org-pretty-table-at-table-p)))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ul-corner))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
                        (forward-line 1)
-                       (org-pretty-table-is-empty-line)))
+                       (not (org-pretty-table-at-table-p))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ll-corner))
                 t)
                (t
@@ -217,15 +223,12 @@ Used by jit-lock for dynamic highlighting."
                        (backward-char 1)
                        (eq (preceding-char) ?-))
                      (save-excursion
-                       (let ((char-pos (- (point) (line-beginning-position) 1)))
-                         (forward-line -1)
-                         (beginning-of-line)
-                         (forward-char char-pos))
-                       (eq (following-char) ?|))
+                       (forward-line -1)
+                       (and (not (bobp))
+                            (org-pretty-table-at-table-p)))
                      (save-excursion
-                       (backward-char 1)
-                       (org-pretty-table-next-line)
-                       (eq (following-char) ?|)))
+                       (forward-line 1)
+                       (org-pretty-table-at-table-p)))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-cross))
                 t)
                ((and (eq (following-char) ?-)
@@ -233,18 +236,12 @@ Used by jit-lock for dynamic highlighting."
                        (backward-char 1)
                        (eq (preceding-char) ?-))
                      (save-excursion
-                       (backward-char 1)
-                       (org-pretty-table-previous-line)
-                       (or (save-excursion
-                             (beginning-of-line)
-                             (bobp))
-                           (memq (following-char) '(? 10))))
+                       (forward-line -1)
+                       (or (bobp)
+                           (not (org-pretty-table-at-table-p))))
                      (save-excursion
-                       (let ((char-pos (- (point) (line-beginning-position) 1)))
-                         (forward-line 1)
-                         (beginning-of-line)
-                         (forward-char char-pos))
-                       (eq (following-char) ?|)))
+                       (forward-line 1)
+                       (org-pretty-table-at-table-p)))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-df-t))
                 t)
                ((and (eq (following-char) ?-)
@@ -260,8 +257,7 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (backward-char 1)
                        (forward-line)
-                       (or (memq (following-char) '(? 10 0))
-                           (eq (char-after (line-beginning-position)) ?#))))
+                       (not (eq (following-char) ?|))))
                 (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-uf-t))
                 t))))))))))
 

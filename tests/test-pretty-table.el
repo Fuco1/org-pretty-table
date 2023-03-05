@@ -12,63 +12,197 @@
 
 (defmacro with-org-table (&rest body)
   (declare (indent 0))
-  `(with-temp-buffer
-     (org-mode)
-     (insert "|------+-----|
+  (let ((prefix (plist-get body :prefix))
+        (suffix (plist-get body :suffix)))
+    `(with-temp-buffer
+       (org-mode)
+       (insert "|------+-----|
 | name | age |
 |------+-----|
 | bob  |  10 |
 |------+-----|")
-     (org-pretty-table-mode 1)
-     (jit-lock-refontify)
-     (jit-lock-fontify-now)
-     ,@body))
+       (when ,prefix
+         (goto-char (point-min))
+         (insert ,prefix))
+       (when ,suffix
+         (goto-char (point-max))
+         (insert ,suffix))
+
+       (org-pretty-table-mode 1)
+       (jit-lock-refontify)
+       (jit-lock-fontify-now)
+       ,@body)))
 
 (describe "org-pretty-table"
 
   (before-each
     (setq org-pretty-table-charset "┌┐└┘┬┤┴├┼─│"))
 
-  (describe "at beginning of buffer"
+  (describe "top row"
 
-    (it "should prettify up-left corner"
+    (describe "at beginning of buffer"
+
+      (it "should prettify up-left corner"
+        (with-org-table
+          (goto-char (point-min))
+          (expect (opt-assert-display "┌") :to-be-truthy)))
+
+      (it "should prettify up-right corner"
+        (with-org-table
+          (goto-char (point-min))
+          (end-of-line)
+          (backward-char 1)
+          (expect (opt-assert-display "┐") :to-be-truthy)))
+
+      (it "should prettify down facing T"
+        (with-org-table
+          (goto-char (point-min))
+          (opt-search-and-backward "+")
+          (expect (opt-assert-display "┬") :to-be-truthy))))
+
+    (describe "with empty line above"
+
+      (it "should prettify up-left corner"
+        (with-org-table
+          :prefix "hello world \n\n"
+          (goto-char (point-min))
+          (opt-search-and-backward "|")
+          (expect (opt-assert-display "┌") :to-be-truthy)))
+
+      (it "should prettify up-right corner"
+        (with-org-table
+          :prefix "hello world \n\n"
+          (goto-char (point-min))
+          (re-search-forward "+")
+          (end-of-line)
+          (backward-char 1)
+          (expect (opt-assert-display "┐") :to-be-truthy)))
+
+      (it "should prettify down facing T"
+        (with-org-table
+          :prefix "hello world \n\n"
+          (goto-char (point-min))
+          (opt-search-and-backward "+")
+          (expect (opt-assert-display "┬") :to-be-truthy))))
+
+    (describe "with content line above"
+
+      (it "should prettify up-left corner"
+        (with-org-table
+          :prefix "** headline\n"
+          (goto-char (point-min))
+          (opt-search-and-backward "|")
+          (expect (opt-assert-display "┌") :to-be-truthy)))
+
+      (it "should prettify up-right corner"
+        (with-org-table
+          :prefix "** headline\n"
+          (goto-char (point-min))
+          (re-search-forward "+")
+          (end-of-line)
+          (backward-char 1)
+          (expect (opt-assert-display "┐") :to-be-truthy)))
+
+      (it "should prettify down facing T"
+        (with-org-table
+          :prefix "** headline\n"
+          (goto-char (point-min))
+          (opt-search-and-backward "+")
+          (expect (opt-assert-display "┬") :to-be-truthy)))))
+
+  (describe "middle row"
+
+    (it "should prettify left facing T"
       (with-org-table
         (goto-char (point-min))
-        (expect (opt-assert-display "┌") :to-be-truthy)))
-
-    (it "should prettify up-right corner"
-      (with-org-table
-        (goto-char (point-min))
+        (re-search-forward "age")
+        (forward-line 1)
         (end-of-line)
         (backward-char 1)
-        (expect (opt-assert-display "┐") :to-be-truthy)))
+        (expect (opt-assert-display "┤") :to-be-truthy)))
 
-    (it "should prettify down facing T"
+    (it "should prettify right facing T"
       (with-org-table
         (goto-char (point-min))
+        (re-search-forward "age")
+        (forward-line 1)
+        (beginning-of-line)
+        (expect (opt-assert-display "├") :to-be-truthy)))
+
+    (it "should prettify cross"
+      (with-org-table
+        (goto-char (point-min))
+        (re-search-forward "+")
         (opt-search-and-backward "+")
-        (expect (opt-assert-display "┬") :to-be-truthy))))
+        (expect (opt-assert-display "┼") :to-be-truthy))))
 
-  (describe "at the middle of buffer"
+  (describe "bottom row"
 
-    (it "should prettify up-left corner"
-      (with-org-table
-        (goto-char (point-min))
-        (insert "hello world \n\n")
-        (opt-search-and-backward "|")
-        (expect (opt-assert-display "┌") :to-be-truthy)))
+    (describe "at the end of buffer"
 
-    (it "should prettify up-right corner"
-      (with-org-table
-        (goto-char (point-min))
-        (insert "hello world \n\n")
-        (end-of-line)
-        (backward-char 1)
-        (expect (opt-assert-display "┐") :to-be-truthy)))
+      (it "should render bottom left corner"
+        (with-org-table
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (beginning-of-line)
+          (expect (opt-assert-display "└") :to-be-truthy)))
 
-    (it "should prettify down facing T"
-      (with-org-table
-        (goto-char (point-min))
-        (insert "hello world \n\n")
-        (opt-search-and-backward "+")
-        (expect (opt-assert-display "┬") :to-be-truthy)))))
+      (it "should render bottom right corner"
+        (with-org-table
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (expect (opt-assert-display "┘") :to-be-truthy)))
+
+      (it "should render up facing T"
+        (with-org-table
+          (goto-char (point-max))
+          (re-search-backward "+")
+          (expect (opt-assert-display "┴") :to-be-truthy))))
+
+    (describe "with empty line below"
+
+      (it "should render bottom left corner"
+        (with-org-table
+          :suffix "\n\nhello"
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (beginning-of-line)
+          (expect (opt-assert-display "└") :to-be-truthy)))
+
+      (it "should render bottom right corner"
+        (with-org-table
+          :suffix "\n\nhello"
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (expect (opt-assert-display "┘") :to-be-truthy)))
+
+      (it "should render up facing T"
+        (with-org-table
+          :suffix "\n\nhello"
+          (goto-char (point-max))
+          (re-search-backward "+")
+          (expect (opt-assert-display "┴") :to-be-truthy))))
+
+    (describe "with content line below"
+
+      (it "should render bottom left corner"
+        (with-org-table
+          :suffix "\n** headline\n"
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (beginning-of-line)
+          (expect (opt-assert-display "└") :to-be-truthy)))
+
+      (it "should render bottom right corner"
+        (with-org-table
+          :suffix "\n** headline\n"
+          (goto-char (point-max))
+          (re-search-backward "|")
+          (expect (opt-assert-display "┘") :to-be-truthy)))
+
+      (it "should render up facing T"
+        (with-org-table
+          :suffix "\n** headline\n"
+          (goto-char (point-max))
+          (re-search-backward "+")
+          (expect (opt-assert-display "┴") :to-be-truthy))))))
