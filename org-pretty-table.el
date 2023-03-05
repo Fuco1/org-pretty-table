@@ -154,7 +154,12 @@ Used by jit-lock for dynamic highlighting."
              ((equal "-" match)
               (backward-char 1)
               (re-search-forward "-+")
-              (put-text-property (match-beginning 0) (match-end 0) 'display (make-string (- (match-end 0) (match-beginning 0)) (aref (org-pretty-table-hb) 0)))
+              (when (looking-at-p "[+|]")
+                (put-text-property
+                 (match-beginning 0) (match-end 0)
+                 'display
+                 (make-string (- (match-end 0) (match-beginning 0))
+                              (aref (org-pretty-table-hb) 0))))
               t)
              ((equal "|" match)
               (cond

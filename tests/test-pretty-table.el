@@ -38,6 +38,17 @@
   (before-each
     (setq org-pretty-table-charset "┌┐└┘┬┤┴├┼─│"))
 
+  (describe "horizontal bar"
+
+    (it "should not prettify segments not ending in + or |"
+      (with-org-table
+        :prefix "|------+-----|\n| ---- | --- |\n"
+        (goto-char (point-min))
+        (forward-line 1)
+        (re-search-forward "----")
+        (backward-char 4)
+        (expect (get-text-property (point) 'display) :to-be nil))))
+
   (describe "top row"
 
     (describe "at beginning of buffer"
