@@ -1,11 +1,13 @@
 ;;; org-pretty-table.el --- Replace org-table characters with box-drawing unicode glyphs -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013 Matus Goljer
+;; Copyright (C) 2013, 2023 Matus Goljer
 
 ;; Author: Matus Goljer <matus.goljer@gmail.com>
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: faces
-;; Version: 0.0.1
+;; URL: https://github.com/Fuco1/org-pretty-table
+;; Package-Requires: ((org "9"))
+;; Version: 1.0.0
 ;; Created: 29th November 2013
 
 ;; This program is free software; you can redistribute it and/or modify
