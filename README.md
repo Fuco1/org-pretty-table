@@ -4,6 +4,8 @@ Draw pretty unicode tables in `org-mode` and `orgtbl-mode`.
 
 Very experimental.
 
+![example](https://pbs.twimg.com/media/FqexCG-WYAA9x_X?format=png&name=large)
+
 # Installation
 
 This package is not yet distributed through package archives and you have to install it manually.
