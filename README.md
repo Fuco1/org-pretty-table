@@ -8,8 +8,12 @@ Very experimental.
 
 # Usage
 
-Just enable the `org-pretty-table-mode` in an org buffer and it will
-replace the ASCII table borders with beautiful unicode ones.
+Enable the `org-pretty-table-mode` in an org buffer and it will
+replace the ASCII table borders with beautiful unicode ones.  The
+replacement is *only visual* (using [display text properties][props]),
+nothing in your file is actually changed.  The buffer and the file
+saved to disc still contains the original ASCII characters (which it
+must since that's what org uses for table detection).
 
 You can customize `org-pretty-table-charset` to change the border
 characters.  This mode comes with two built-in "themes", single
@@ -48,3 +52,5 @@ Run tests with
 ``` shell
 eask test buttercup
 ```
+
+[props]: https://www.gnu.org/software/emacs/manual/html_node/elisp/Special-Properties.html
