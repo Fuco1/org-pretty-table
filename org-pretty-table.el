@@ -1,4 +1,4 @@
-;;; org-pretty-table.el --- Replace org-table characters with box-drawing unicode glyphs.
+;;; org-pretty-table.el --- Replace org-table characters with box-drawing unicode glyphs -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Matus Goljer
 
