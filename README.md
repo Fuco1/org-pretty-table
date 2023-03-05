@@ -22,3 +22,17 @@ This package is not yet distributed through package archives and you have to ins
 3. Evaluate the `progn` block by putting the point on the `progn` and calling `C-M-x` (`M-x eval-defun`).  If unsure, you can also simply restart Emacs.
 
 4. Open an org-mode file.  Calling `M-: org-pretty-table-mode RET` should print `1` in the minibuffer.  You're done!
+
+# Development
+
+Use Eask to install dependencies:
+
+``` shell
+eask install-deps --dev
+```
+
+Run tests with
+
+``` shell
+eask test buttercup
+```
