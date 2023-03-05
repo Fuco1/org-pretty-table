@@ -29,11 +29,81 @@
 
 ;;; Code:
 
+(require 'org)
+
 (defconst org-pretty-table-regexp (regexp-opt '("-" "+" "|")))
+
+(defgroup org-pretty-table ()
+  "Replace org-table characters with box-drawing unicode glyphs."
+  :group 'org)
+
+(defcustom org-pretty-table-charset "┌┐└┘┬┤┴├┼─│"
+  "Charset to draw the table.
+
+The order of the blocks is:
+
+- upper left corner
+- upper right corner
+- lower left corner
+- lower right corner
+- down-facing T
+- left-facing T
+- up-facing T
+- right-facing T
+- cross
+- horizontal bar
+- vertical bar"
+  :group 'org-pretty-table
+  :type '(choice (const :tag "Single horizontal lines" "┌┐└┘┬┤┴├┼─│")
+                 (const :tag "Double horizontal lines" "╒╕╘╛╤╡╧╞╪═│")
+                 (string :tag "Custom")))
 
 (defsubst org-pretty-table-is-empty-line ()
   (looking-at-p (rx bol (* blank) (or eol ?#))))
 
+(defsubst org-pretty-table-ul-corner ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 0)))
+
+(defsubst org-pretty-table-ur-corner ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 1)))
+
+(defsubst org-pretty-table-ll-corner ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 2)))
+
+(defsubst org-pretty-table-lr-corner ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 3)))
+
+(defsubst org-pretty-table-df-t ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 4)))
+
+(defsubst org-pretty-table-lf-t ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 5)))
+
+(defsubst org-pretty-table-uf-t ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 6)))
+
+(defsubst org-pretty-table-rf-t ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 7)))
+
+(defsubst org-pretty-table-cross ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 8)))
+
+(defsubst org-pretty-table-hb ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 9)))
+
+(defsubst org-pretty-table-vb ()
+  (declare (pure t))
+  (make-string 1 (aref org-pretty-table-charset 10)))
 (defun org-pretty-table-propertize-region (start end)
   "Replace org-table characters with box-drawing unicode glyphs
 between START and END.
@@ -66,7 +136,7 @@ Used by jit-lock for dynamic highlighting."
              ((equal "-" match)
               (backward-char 1)
               (re-search-forward "-+")
-              (put-text-property (match-beginning 0) (match-end 0) 'display (make-string (- (match-end 0) (match-beginning 0)) ?─))
+              (put-text-property (match-beginning 0) (match-end 0) 'display (make-string (- (match-end 0) (match-beginning 0)) (aref (org-pretty-table-hb) 0)))
               t)
              ((equal "|" match)
               (cond
@@ -77,7 +147,7 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (forward-line -1)
                        (not (org-pretty-table-is-empty-line))))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "├")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-rf-t))
                 t)
                ((and (save-excursion
                        (backward-char 1)
@@ -88,7 +158,7 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (forward-line -1)
                        (not (org-pretty-table-is-empty-line))))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┤")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-lf-t))
                 t)
                ((and (save-excursion
                        (backward-char 1)
@@ -96,7 +166,7 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (forward-line -1)
                        (org-pretty-table-is-empty-line)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┐")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ur-corner))
                 t)
                ((and (save-excursion
                        (backward-char 1)
@@ -104,22 +174,22 @@ Used by jit-lock for dynamic highlighting."
                      (save-excursion
                        (forward-line 1)
                        (org-pretty-table-is-empty-line)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┘")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-lr-corner))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
                        (forward-line -1)
                        (org-pretty-table-is-empty-line)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┌")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ul-corner))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
                        (forward-line 1)
                        (org-pretty-table-is-empty-line)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "└")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-ll-corner))
                 t)
                (t
-                (put-text-property (match-beginning 0) (match-end 0) 'display "│")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-vb))
                 t)))
              ((equal "+" match)
               (cond
@@ -137,7 +207,7 @@ Used by jit-lock for dynamic highlighting."
                        (backward-char 1)
                        (next-line)
                        (eq (following-char) ?|)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┼")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-cross))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
@@ -153,7 +223,7 @@ Used by jit-lock for dynamic highlighting."
                          (beginning-of-line)
                          (forward-char char-pos))
                        (eq (following-char) ?|)))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┬")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-df-t))
                 t)
                ((and (eq (following-char) ?-)
                      (save-excursion
@@ -170,7 +240,7 @@ Used by jit-lock for dynamic highlighting."
                        (next-line)
                        (or (memq (following-char) '(? 10))
                            (eq (char-after (line-beginning-position)) ?#))))
-                (put-text-property (match-beginning 0) (match-end 0) 'display "┴")
+                (put-text-property (match-beginning 0) (match-end 0) 'display (org-pretty-table-uf-t))
                 t))))))))))
 
 (defun org-pretty-table-unpropertize-region (start end)
