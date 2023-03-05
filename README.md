@@ -6,6 +6,16 @@ Very experimental.
 
 ![example](https://pbs.twimg.com/media/FqexCG-WYAA9x_X?format=png&name=large)
 
+# Usage
+
+Just enable the `org-pretty-table-mode` in an org buffer and it will
+replace the ASCII table borders with beautiful unicode ones.
+
+You can customize `org-pretty-table-charset` to change the border
+characters.  This mode comes with two built-in "themes", single
+horizontal lines and double horizontal lines.  See `M-x
+customize-variable RET org-pretty-table-charset RET`.
+
 # Installation
 
 This package is not yet distributed through package archives and you have to install it manually.

@@ -42,6 +42,9 @@
 (defcustom org-pretty-table-charset "┌┐└┘┬┤┴├┼─│"
   "Charset to draw the table.
 
+The value is a string of length 11 with the characters used to
+draw the table borders.
+
 The order of the blocks is:
 
 - upper left corner
