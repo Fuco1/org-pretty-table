@@ -35,6 +35,9 @@ jobs:
       with:
         version: 'snapshot'
 
+    - name: Install dependencies
+      run: 'eask install-deps --dev'
+
     - name: Run buttercup
       run: |
         eask test buttercup
