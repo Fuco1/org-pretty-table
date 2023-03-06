@@ -6,7 +6,7 @@
 ;; Maintainer: Matus Goljer <matus.goljer@gmail.com>
 ;; Keywords: faces
 ;; URL: https://github.com/Fuco1/org-pretty-table
-;; Package-Requires: ((org "9"))
+;; Package-Requires: ((org "9") (emacs "24.1"))
 ;; Version: 1.0.0
 ;; Created: 29th November 2013
 
@@ -63,71 +63,69 @@ The order of the blocks is:
                  (const :tag "Double horizontal lines" "╒╕╘╛╤╡╧╞╪═│")
                  (string :tag "Custom")))
 
-(defsubst org-pretty-table-is-empty-line ()
-  (looking-at-p (rx bol (* blank) (or eol ?#))))
-
 (defsubst org-pretty-table-ul-corner ()
+  "Return upper left corner character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 0)))
 
 (defsubst org-pretty-table-ur-corner ()
+  "Return upper right corner character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 1)))
 
 (defsubst org-pretty-table-ll-corner ()
+  "Return lower left corner character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 2)))
 
 (defsubst org-pretty-table-lr-corner ()
+  "Return lower right corner character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 3)))
 
 (defsubst org-pretty-table-df-t ()
+  "Return down facing T character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 4)))
 
 (defsubst org-pretty-table-lf-t ()
+  "Return left facing T character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 5)))
 
 (defsubst org-pretty-table-uf-t ()
+  "Return up facing T character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 6)))
 
 (defsubst org-pretty-table-rf-t ()
+  "Return right facing T character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 7)))
 
 (defsubst org-pretty-table-cross ()
+  "Return cross character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 8)))
 
 (defsubst org-pretty-table-hb ()
+  "Return horizontal bar character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 9)))
 
 (defsubst org-pretty-table-vb ()
+  "Return vertical bar character as a string."
   (declare (pure t))
   (make-string 1 (aref org-pretty-table-charset 10)))
 
-(defun org-pretty-table-next-line ()
-  (let ((cc (current-column)))
-    (forward-line)
-    (move-to-column cc)))
-
-(defun org-pretty-table-previous-line ()
-  (let ((cc (current-column)))
-    (forward-line -1)
-    (move-to-column cc)))
-
 (defun org-pretty-table-at-table-p ()
+  "Check if point is at table."
   (save-excursion
     (skip-syntax-forward " " (line-end-position))
     (eq (following-char) ?|)))
 
 (defun org-pretty-table-propertize-region (start end)
-  "Replace org-table characters with box-drawing unicode glyphs
-between START and END.
+  "Replace org-table characters with box-drawing glyphs between START and END.
 
 Used by jit-lock for dynamic highlighting."
   (save-excursion
@@ -286,10 +284,12 @@ Used by jit-lock for dynamic highlighting."
 
 ;;;###autoload
 (defun turn-on-org-pretty-table-mode ()
+  "Turn on `org-pretty-table-mode'."
   (org-pretty-table-mode 1))
 
 ;;;###autoload
 (defun turn-off-org-pretty-table-mode ()
+  "Turn off `org-pretty-table-mode'."
   (org-pretty-table-mode 0))
 
 ;;;###autoload
