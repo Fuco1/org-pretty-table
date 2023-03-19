@@ -271,6 +271,18 @@ Used by jit-lock for dynamic highlighting."
   "Remove box-drawing compositions between START and END."
   (remove-text-properties start end '(display)))
 
+(defun org-pretty-table-unpropertize-table ()
+  "Remove box-drawing compositions from table at point."
+  (org-pretty-table-unpropertize-region (org-table-begin) (org-table-end)))
+
+(defun org-pretty-table-align (oldfun &rest args)
+  (unwind-protect
+      (progn
+        (org-pretty-table-mode -1)
+        (org-pretty-table-unpropertize-table)
+        (apply oldfun args))
+    (org-pretty-table-mode 1)))
+
 ;;; Minor mode:
 
 ;;;###autoload
@@ -278,8 +290,11 @@ Used by jit-lock for dynamic highlighting."
   "Replace org-table characters with box-drawing unicode glyphs."
   :lighter " OPT"
   (if org-pretty-table-mode
-      (jit-lock-register 'org-pretty-table-propertize-region t)
+      (progn
+        (jit-lock-register 'org-pretty-table-propertize-region t)
+        (advice-add 'org-table-align :around #'org-pretty-table-align))
     (jit-lock-unregister 'org-pretty-table-propertize-region)
+    (advice-remove 'org-table-align #'org-pretty-table-align)
     (org-pretty-table-unpropertize-region (point-min) (point-max))))
 
 ;;;###autoload
